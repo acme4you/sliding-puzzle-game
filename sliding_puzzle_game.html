@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Sliding Puzzle Game</title>
+  <style>
+    body { font-family: Arial; text-align: center; margin-top: 20px; }
+    #game { display: grid; grid-template-columns: repeat(3, 100px); grid-gap: 5px; margin: 20px auto; }
+    .tile {
+      width: 100px; height: 100px;
+      background-color: #f0f0f0;
+      font-size: 2em;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      border: 1px solid #ccc;
+    }
+    .empty { background-color: #fff; cursor: default; }
+    #controls { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h2>Sliding Puzzle Game</h2>
+  <div id="game"></div>
+  <div id="controls">
+    <button onclick="shuffle()">Shuffle</button>
+    <p>Moves: <span id="moveCounter">0</span></p>
+    <p>Time: <span id="timer">0</span> seconds</p>
+  </div>
+
+  <script>
+    let tiles = [];
+    let moveCount = 0;
+    let timeElapsed = 0;
+    let timerInterval;
+
+    function createTiles() {
+      tiles = [...Array(8).keys()].map(x => x + 1);
+      tiles.push(null);
+      render();
+    }
+
+    function render() {
+      const game = document.getElementById("game");
+      game.innerHTML = "";
+      tiles.forEach((tile, index) => {
+        const div = document.createElement("div");
+        div.className = tile ? "tile" : "tile empty";
+        div.textContent = tile || "";
+        div.onclick = () => moveTile(index);
+        game.appendChild(div);
+      });
+    }
+
+    function moveTile(index) {
+      const emptyIndex = tiles.indexOf(null);
+      const validMoves = [emptyIndex - 1, emptyIndex + 1, emptyIndex - 3, emptyIndex + 3];
+      if (validMoves.includes(index) &&
+          !(emptyIndex % 3 === 0 && index === emptyIndex - 1) &&
+          !(emptyIndex % 3 === 2 && index === emptyIndex + 1)) {
+        [tiles[emptyIndex], tiles[index]] = [tiles[index], tiles[emptyIndex]];
+        moveCount++;
+        document.getElementById("moveCounter").textContent = moveCount;
+        render();
+      }
+    }
+
+    function shuffle() {
+      for (let i = tiles.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+      }
+      moveCount = 0;
+      timeElapsed = 0;
+      document.getElementById("moveCounter").textContent = moveCount;
+      document.getElementById("timer").textContent = timeElapsed;
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeElapsed++;
+        document.getElementById("timer").textContent = timeElapsed;
+      }, 1000);
+      render();
+    }
+
+    createTiles();
+  </script>
+</body>
+</html>
